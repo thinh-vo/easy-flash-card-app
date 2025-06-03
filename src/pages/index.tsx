@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import FlashcardList from '../components/FlashcardList';
 import FlashcardForm from '../components/FlashcardForm';
 import Flashcard from '../components/Flashcard'; // Ensure this is the correct default import
 import { Flashcard as FlashcardType } from '../types/flashcard';
@@ -20,8 +19,6 @@ const defaultFlashcards = [
 
 const Home: React.FC = () => {
   const [flashcards, setFlashcards] = useState<FlashcardType[]>([]);
-  const [newWord, setNewWord] = useState<string>(''); // Explicitly typed as string
-  const [newImage, setNewImage] = useState<string>(''); // Explicitly typed as string
   const [todayCount, setTodayCount] = useState<number>(0); // Explicitly typed as number
   const [username, setUsername] = useState<string | null>(null);
   const [flippedIndexes, setFlippedIndexes] = useState<number[]>([]); // Track flipped cards
@@ -55,36 +52,30 @@ const Home: React.FC = () => {
     }
   }, []);
 
-  const addFlashcard = () => {
-    if (!newWord || !newImage) {
-      alert('Please fill in both the word and the image URL.');
+  const addFlashcard = ({ frontImage: image, backText, pronunciation }: { frontImage: string; backText: string; pronunciation: string }) => {
+    if (!backText || backText?.trim() === "") {
+      alert("Please fill in the word ");
       return;
     }
 
-    const isDuplicate = flashcards.some(
-      (card) => card.backText === newWord
-    );
+    const isDuplicate = flashcards.some((card) => card.backText === backText);
 
     if (!isDuplicate) {
       const newFlashcard: FlashcardType = {
-        frontImage: newImage,
-        backText: newWord,
-        pronunciation: newWord,
+        frontImage: image,
+        backText: backText,
+        pronunciation: backText,
         createdAt: new Date(),
       };
-      const updatedFlashcards = [
-        ...flashcards,
-        newFlashcard,
-      ].sort(
-        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      const updatedFlashcards = [...flashcards, newFlashcard].sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       );
       setFlashcards(updatedFlashcards);
       saveFlashcardsToLocalStorage(updatedFlashcards);
       updateTodayCount(updatedFlashcards);
-      setNewWord('');
-      setNewImage('');
     } else {
-      alert('This flashcard already exists!');
+      alert("This flashcard already exists!");
     }
   };
 
@@ -92,15 +83,6 @@ const Home: React.FC = () => {
     const updatedFlashcards = flashcards.filter((_, i) => i !== index);
     setFlashcards(updatedFlashcards);
     saveFlashcardsToLocalStorage(updatedFlashcards); // Save updated list to local storage
-  };
-
-  const moveLastCardToFirst = () => {
-    if (flashcards.length > 1) {
-      const sortedFlashcards = [...flashcards].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-      const updatedFlashcards = [sortedFlashcards[sortedFlashcards.length - 1], ...sortedFlashcards.slice(0, -1)];
-      setFlashcards(updatedFlashcards);
-      saveFlashcardsToLocalStorage(updatedFlashcards);
-    }
   };
 
   const handleSetUsername = () => {
@@ -119,13 +101,11 @@ const Home: React.FC = () => {
     );
   };
 
-  console.log("flashcards", flashcards);
-
   return (
     <div style={{ padding: 16 }}>
       <LanguageSwitcher />
       <h1 style={{ textAlign: 'center' }}>Easy Flash Card App</h1>
-      <FlashcardForm onAddFlashcard={addFlashcard} />
+      <FlashcardForm onAddFlashcard={addFlashcard}/>
       <div style={{ padding: '16px', textAlign: 'center' }}>
         <h2>
           {language === 'en'
