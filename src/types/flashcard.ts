@@ -1,6 +1,6 @@
 export interface Flashcard {
   frontImage: string;
   backText: string;
-  pronunciation: string; // now just the word itself
-  createdAt?: Date; // Add createdAt field
+  pronunciation: string;
+  createdAt: Date; // Ensure createdAt is explicitly typed as Date
 }

@@ -5,13 +5,13 @@ const FLASHCARDS_KEY = 'flashcards';
 export const getFlashcardsFromLocalStorage = (): Flashcard[] => {
   const stored = localStorage.getItem(FLASHCARDS_KEY);
   if (!stored) return [];
-  const parsed = JSON.parse(stored);
-  return parsed.map((card: Flashcard) => ({
+  const parsed: Flashcard[] = JSON.parse(stored);
+  return parsed.map((card) => ({
     ...card,
-    createdAt: card.createdAt ? new Date(card.createdAt) : undefined,
+    createdAt: new Date(card.createdAt),
   }));
 };
 
-export const saveFlashcardsToLocalStorage = (flashcards: Flashcard[]) => {
-  localStorage.setItem(FLASHCARDS_KEY, JSON.stringify(flashcards)); // Ensure only the updated list is saved
+export const saveFlashcardsToLocalStorage = (flashcards: Flashcard[]): void => {
+  localStorage.setItem(FLASHCARDS_KEY, JSON.stringify(flashcards));
 };

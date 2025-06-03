@@ -20,7 +20,9 @@ const defaultFlashcards = [
 
 const Home: React.FC = () => {
   const [flashcards, setFlashcards] = useState<FlashcardType[]>([]);
-  const [todayCount, setTodayCount] = useState(0);
+  const [newWord, setNewWord] = useState<string>(''); // Explicitly typed as string
+  const [newImage, setNewImage] = useState<string>(''); // Explicitly typed as string
+  const [todayCount, setTodayCount] = useState<number>(0); // Explicitly typed as number
   const [username, setUsername] = useState<string | null>(null);
   const [flippedIndexes, setFlippedIndexes] = useState<number[]>([]); // Track flipped cards
   const [showTodayOnly, setShowTodayOnly] = useState(false);
@@ -39,7 +41,7 @@ const Home: React.FC = () => {
     const storedFlashcards = getFlashcardsFromLocalStorage();
     if (storedFlashcards && storedFlashcards.length > 0) {
       const sortedFlashcards = storedFlashcards.sort(
-        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        (a, b) => new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime()
       );
       setFlashcards(sortedFlashcards);
       updateTodayCount(sortedFlashcards);
@@ -53,29 +55,36 @@ const Home: React.FC = () => {
     }
   }, []);
 
-  const addFlashcard = (newFlashcard: FlashcardType) => {
+  const addFlashcard = () => {
+    if (!newWord || !newImage) {
+      alert('Please fill in both the word and the image URL.');
+      return;
+    }
+
     const isDuplicate = flashcards.some(
-      (card) =>
-        card.backText === newFlashcard.backText &&
-        card.pronunciation === newFlashcard.pronunciation
+      (card) => card.backText === newWord
     );
 
     if (!isDuplicate) {
+      const newFlashcard: FlashcardType = {
+        frontImage: newImage,
+        backText: newWord,
+        pronunciation: newWord,
+        createdAt: new Date(),
+      };
       const updatedFlashcards = [
         ...flashcards,
-        { ...newFlashcard, createdAt: new Date() },
+        newFlashcard,
       ].sort(
         (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       );
       setFlashcards(updatedFlashcards);
       saveFlashcardsToLocalStorage(updatedFlashcards);
       updateTodayCount(updatedFlashcards);
+      setNewWord('');
+      setNewImage('');
     } else {
-      alert(
-        language === 'en'
-          ? 'This flashcard already exists!'
-          : 'Thẻ này đã tồn tại!'
-      );
+      alert('This flashcard already exists!');
     }
   };
 
